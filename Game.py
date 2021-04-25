@@ -11,13 +11,11 @@ white=(255,255,255)
 red=(255,0,0)
 green=(0,255,0)
 
-Sides=['w','b']
-
+#create a board and setup the pieces
 ChessBoard=[["  " for i in range(8)] for i in range (8)]
 for x in range(8): 
     ChessBoard[1][x]='bp'
     ChessBoard[6][x]='wp'
-
 
 Side=['r','n','b','q','k','b','n','r']
 for i in range(8):
@@ -49,28 +47,34 @@ PieceSelected=False
 WhiteToMove=True
 OneMoveBackChessBoard=False
 KingInCheck=False
+
+def debug():
+    print(np.array(ChessBoard),'\n')
+    print(PieceSelected,SquareClicked)
+    print(KingInCheck)
+    print(IsKingInCheck(ChessBoard,WhiteToMove))
+
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             SquareClicked=[pos[0]//100,pos[1]//100]
-            print(PieceSelected,SquareClicked)
-            print(KingInCheck)
-            print(IsKingInCheck(ChessBoard,WhiteToMove))
+            debug()
             if PieceSelected:
                 if MoveValidator(PieceSelected,SquareClicked,PieceSelectedType,ChessBoard,WhiteToMove,KingInCheck):
                     OneMoveBackChessBoard=copy.deepcopy(ChessBoard)
                     ChessBoard[SquareClicked[1]][SquareClicked[0]]=ChessBoard[PieceSelected[1]][PieceSelected[0]]
                     ChessBoard[PieceSelected[1]][PieceSelected[0]]='  '
-                    print(np.array(ChessBoard),'\n')
+
                     if WhiteToMove: WhiteToMove=False
                     else: WhiteToMove=True
                     if IsKingInCheck(ChessBoard,WhiteToMove): KingInCheck=True
                     else :KingInCheck=False
                 backgroundreset()
+                #put a red square on king if he is in check
                 if KingInCheck:
                     PosOfKing=0
-    
                     for x in range(8):
                         for y in range(8):
                             if ChessBoard[y][x]=='wk' and WhiteToMove: PosOfKing=[x,y]
@@ -84,6 +88,7 @@ while True:
                 PieceSelected=SquareClicked
                 PieceSelectedType=ChessBoard[PieceSelected[1]][PieceSelected[0]]
                 backgroundreset()
+                #draw all legal moves for selected piece
                 for x in range(8):
                     for y in range(8):
                         if MoveValidator(PieceSelected,[x,y],PieceSelectedType,ChessBoard,WhiteToMove,KingInCheck):
