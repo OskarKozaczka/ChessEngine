@@ -1,6 +1,6 @@
 import pygame
-import numpy as np
-import utility
+from numpy import array
+from utility import MoveValidator,IsKingInCheck
 import copy
 
 pygame.init()
@@ -40,16 +40,13 @@ def UpdatePiecePositions():
                 Piece=pygame.image.load('Pieces/{}.png'.format(ChessBoard[x][y]))
                 screen.blit(Piece,(100*y+Offset,100*x+Offset))
 
-
-MoveValidator=utility.MoveValidator
-IsKingInCheck=utility.IsKingInCheck
 PieceSelected=False
 WhiteToMove=True
 OneMoveBackChessBoard=False
 KingInCheck=False
 
 def debug():
-    print(np.array(ChessBoard),'\n')
+    print(array(ChessBoard),'\n')
     print(PieceSelected,SquareClicked)
     print(KingInCheck)
     print(IsKingInCheck(ChessBoard,WhiteToMove))
@@ -99,7 +96,6 @@ while True:
             if WhiteToMove: WhiteToMove=False
             else: WhiteToMove=True
             backgroundreset()
-            print(np.array(ChessBoard),'\n')
         if event.type == pygame.QUIT:
             pygame.quit()
     #IsKingInCheck(ChessBoard,WhiteToMove)
