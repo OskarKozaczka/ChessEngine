@@ -16,7 +16,7 @@ ChessBoard=[["  " for i in range(8)] for i in range (8)]
 for x in range(8): 
     ChessBoard[1][x]='bp'
     ChessBoard[6][x]='wp'
-
+ 
 Side=['r','n','b','q','k','b','n','r']
 for i in range(8):
     ChessBoard[0][i]='b'+Side[i]
