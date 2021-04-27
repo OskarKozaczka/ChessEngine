@@ -22,6 +22,7 @@ for i in range(8):
     ChessBoard[0][i]='b'+Side[i]
     ChessBoard[7][i]='w'+Side[i]
 
+
 #ChessBoard[2][2]='wr'
 def backgroundreset():
     screen.fill(white)
