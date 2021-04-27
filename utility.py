@@ -15,13 +15,13 @@ def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
     
     if piece=='wp':
         if endpos[1]==startpos[1]-1 and endpos[0]==startpos[0] and board[startpos[1]-1][startpos[0]]=="  ": SeemsLegal=True
-        if endpos[1]==startpos[1]-2 and startpos[1]==6 and endpos[0]==startpos[0]  and board[startpos[1]-2][startpos[0]]=="  ": SeemsLegal=True 
+        if endpos[1]==startpos[1]-2 and startpos[1]==6 and endpos[0]==startpos[0]  and board[startpos[1]-2][startpos[0]]=="  " and board[startpos[1]-1][startpos[0]]=="  " : SeemsLegal=True 
         if endpos[1]==startpos[1]-1 and endpos[0]==startpos[0]-1 and board[endpos[1]][endpos[0]][0]=='b': SeemsLegal=True
         if endpos[1]==startpos[1]-1 and endpos[0]==startpos[0]+1 and board[endpos[1]][endpos[0]][0]=='b': SeemsLegal=True
             
     if piece=='bp':
         if endpos[1]==startpos[1]+1 and endpos[0]==startpos[0] and board[startpos[1]+1][startpos[0]]=="  ": SeemsLegal=True    
-        if endpos[1]==startpos[1]+2 and startpos[1]==1 and endpos[0]==startpos[0] and board[startpos[1]+2][startpos[0]]=="  ": SeemsLegal=True    
+        if endpos[1]==startpos[1]+2 and startpos[1]==1 and endpos[0]==startpos[0] and board[startpos[1]+2][startpos[0]]=="  " and board[startpos[1]+1][startpos[0]]=="  ": SeemsLegal=True    
         if endpos[1]==startpos[1]+1 and endpos[0]==startpos[0]-1 and board[endpos[1]][endpos[0]][0]=='w': SeemsLegal=True 
         if endpos[1]==startpos[1]+1 and endpos[0]==startpos[0]+1 and board[endpos[1]][endpos[0]][0]=='w': SeemsLegal=True
 
@@ -120,6 +120,12 @@ def PrintPositionInFENNotation(board,WhiteToMove):
 
     print(string[1:]+(" w - - 0 1" if WhiteToMove else " b - - 0 1")) 
 
-
+def ToStatndardNotation(Move):
+    Letters=['a','b','c','d','e','f','g','h']
+    string=''
+    if Move[0][1]!='p': string+=Move[0][1]
+    string+=Letters[Move[2][0]]
+    string+=str(7-Move[2][1])
+    return string
 
 
