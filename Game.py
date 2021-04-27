@@ -51,6 +51,20 @@ WhiteToMove=True
 OneMoveBackChessBoard=False
 KingInCheck=False
 
+def RedCheckSquare():
+    if IsKingInCheck(ChessBoard,WhiteToMove):
+        PosOfKing=0
+        for x in range(8):
+            for y in range(8):
+                if ChessBoard[y][x]=='wk' and WhiteToMove: PosOfKing=[x,y]
+                if ChessBoard[y][x]=='bk' and WhiteToMove ==False: PosOfKing=[x,y]
+        pygame.draw.rect(screen,red,(100*PosOfKing[0],100*PosOfKing[1],100,100))
+
+def DrawLegalMoves():
+    for x in range(8):
+        for y in range(8):
+            if MoveValidator(PieceSelected,[x,y],PieceSelectedType,ChessBoard,WhiteToMove):
+                pygame.draw.rect(screen,(255,140,140),(100*x,100*y,100,100))
 
 def debug():
     print(array(ChessBoard),'\n')
@@ -73,20 +87,11 @@ while True:
 
                     if WhiteToMove: WhiteToMove=False
                     else: WhiteToMove=True
-                    if IsKingInCheck(ChessBoard,WhiteToMove): KingInCheck=True
-                    else :KingInCheck=False
 
                     promote()
                 backgroundreset()
                 debug()
-                #put a red square on king if he is in check
-                if KingInCheck:
-                    PosOfKing=0
-                    for x in range(8):
-                        for y in range(8):
-                            if ChessBoard[y][x]=='wk' and WhiteToMove: PosOfKing=[x,y]
-                            if ChessBoard[y][x]=='bk' and WhiteToMove ==False: PosOfKing=[x,y]
-                    pygame.draw.rect(screen,red,(100*PosOfKing[0],100*PosOfKing[1],100,100))
+                RedCheckSquare()
                 PieceSelected=False
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
@@ -95,11 +100,7 @@ while True:
                 PieceSelected=SquareClicked
                 PieceSelectedType=ChessBoard[PieceSelected[1]][PieceSelected[0]]
                 backgroundreset()
-                #draw all legal moves for selected piece
-                for x in range(8):
-                    for y in range(8):
-                        if MoveValidator(PieceSelected,[x,y],PieceSelectedType,ChessBoard,WhiteToMove):
-                            pygame.draw.rect(screen,(255,140,140),(100*x,100*y,100,100))
+                DrawLegalMoves()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and ChessBoard!=OneMoveBackChessBoard and OneMoveBackChessBoard:
             print ('move undone')
             ChessBoard=OneMoveBackChessBoard
