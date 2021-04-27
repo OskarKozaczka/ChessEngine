@@ -3,9 +3,6 @@ import itertools as it
 from numpy import array
 def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
     
-    
-
-
     SeemsLegal=False
     
     if WhiteToMove and piece[0]=='b': return False
@@ -80,7 +77,7 @@ def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
         board2=copy.deepcopy(board)
         board2[endpos[1]][endpos[0]]=piece
         board2[startpos[1]][startpos[0]]='  '
-        if IsKingInCheck(board2,WhiteToMove)==False: return True
+        if IsKingInCheck(board2,False if WhiteToMove else True)==False: return True
     return False
 
 def IsKingInCheck(board,WhiteToMove):
@@ -94,7 +91,7 @@ def IsKingInCheck(board,WhiteToMove):
             if board[y][x]=='bk' and WhiteToMove ==False: 
                 PosOfKing=[x,y]
                 break
-    if PosOfKing==0: return True
+    if PosOfKing==0: return False
     for x in range(8):
         for y in range(8):
             if MoveValidator([x,y],PosOfKing,board[y][x],board,False if WhiteToMove else True):
@@ -102,24 +99,14 @@ def IsKingInCheck(board,WhiteToMove):
     return False
             
 
-def PrintPositionInFENNotation(board,WhiteToMove):
-    string=''
-    for row in board:
-        string+='/'
-        Blanks=0
-        for square in row:
-            if square!='  ':
-                if Blanks!=0:
-                    string+=str(Blanks)
-                    Blanks=0
-                string+=square[1] if square[0]=='b' else square[1].upper() 
-            
-            else:
-                Blanks+=1
-        if Blanks!=0 and square==row[-1]: string+=str(Blanks)
 
-    print(string[1:]+(" w - - 0 1" if WhiteToMove else " b - - 0 1")) 
+board=[['br', 'bn', 'bb', '  ', 'bk', 'bb', 'bn', 'br'],
+ ['bp', 'bp', 'bp', '  ', '  ', '  ', 'bp', 'bp'],
+['  ', '  ', '  ', '  ', '  ', '  ', '  ', '  '],
+['  ', 'wb', '  ', 'bp', 'bp', 'bp', '  ', '  '], 
+['  ', '  ', '  ', 'wp', 'wp', 'wp', '  ', 'bq'], 
+['  ', '  ', '  ', '  ', '  ', '  ', '  ', '  '], 
+['wp', 'wp', 'wp', '  ', '  ', '  ', 'wp', 'wp'], 
+['wr', 'wn', 'wb', 'wq', 'wk', '  ', 'wn', 'wr']]
 
-
-
-
+print(MoveValidator([1,3],[4,0],'wb',board,True))
