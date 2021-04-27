@@ -1,7 +1,9 @@
 import pygame
 from numpy import array
 from utility import MoveValidator,IsKingInCheck,PrintPositionInFENNotation
+from Engine import RateMoves
 import copy
+
 
 pygame.init()
 screen= pygame.display.set_mode((800,800))
@@ -42,14 +44,17 @@ def UpdatePiecePositions():
                 screen.blit(Piece,(100*y+Offset,100*x+Offset))
 
 
-def promote():
-    for square in ChessBoard[0]:
-        if square =="wp": ChessBoard[0][ChessBoard[0].index(square)]='wq'
-        if square=="bp": ChessBoard[0][ChessBoard[0].index(square)]='bq'
-PieceSelected=False
+def promote(WhiteToMove):
+    if WhiteToMove:
+        for square in ChessBoard[0]:
+            if square =="wp": ChessBoard[0][ChessBoard[0].index(square)]='wq'
+    else:
+        for square in ChessBoard[7]:
+            if square=="bp": ChessBoard[7][ChessBoard[7].index(square)]='bq'
+PieceSelectedPos=False
 WhiteToMove=True
 OneMoveBackChessBoard=False
-KingInCheck=False
+Mate=False
 
 def RedCheckSquare():
     if IsKingInCheck(ChessBoard,WhiteToMove):
@@ -63,42 +68,62 @@ def RedCheckSquare():
 def DrawLegalMoves():
     for x in range(8):
         for y in range(8):
-            if MoveValidator(PieceSelected,[x,y],PieceSelectedType,ChessBoard,WhiteToMove):
+            if MoveValidator(PieceSelectedPos,[x,y],PieceSelectedPosType,ChessBoard,WhiteToMove):
                 pygame.draw.rect(screen,(255,140,140),(100*x,100*y,100,100))
 
 def debug():
+    #print(ListEveryLegalMove())
     print(array(ChessBoard),'\n')
     #print(ChessBoard)
-    print(PieceSelected,SquareClicked)
-    print(KingInCheck)
-    print(IsKingInCheck(ChessBoard,WhiteToMove))
+    print(PieceSelectedPos,SquareClicked)
+    print("Check",IsKingInCheck(ChessBoard,WhiteToMove))
     PrintPositionInFENNotation(ChessBoard,WhiteToMove)
+
+def ListEveryLegalMove():
+    ListOfMoves=[]
+    for xx in range(8):
+        for yy in range(8):
+            for x in range(8):
+                for y in range(8):
+                    if MoveValidator([xx,yy],[x,y],ChessBoard[yy][xx],ChessBoard,WhiteToMove):
+                        ListOfMoves.append((ChessBoard[yy][xx],[xx,yy],[x,y]))
+    return ListOfMoves
+
+def EngineMove():
+    Move=RateMoves(ListEveryLegalMove(),ChessBoard)
+    ChessBoard[Move[2][1]][Move[2][0]]=Move[0]
+    ChessBoard[Move[1][1]][Move[1][0]]='  '
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             SquareClicked=[pos[0]//100,pos[1]//100]
-            if PieceSelected:
-                if MoveValidator(PieceSelected,SquareClicked,PieceSelectedType,ChessBoard,WhiteToMove):
+            if PieceSelectedPos:
+                if MoveValidator(PieceSelectedPos,SquareClicked,PieceSelectedPosType,ChessBoard,WhiteToMove):
                     OneMoveBackChessBoard=copy.deepcopy(ChessBoard)
-                    ChessBoard[SquareClicked[1]][SquareClicked[0]]=ChessBoard[PieceSelected[1]][PieceSelected[0]]
-                    ChessBoard[PieceSelected[1]][PieceSelected[0]]='  '
-
-                    if WhiteToMove: WhiteToMove=False
-                    else: WhiteToMove=True
-
-                    promote()
+                    ChessBoard[SquareClicked[1]][SquareClicked[0]]=ChessBoard[PieceSelectedPos[1]][PieceSelectedPos[0]]
+                    ChessBoard[PieceSelectedPos[1]][PieceSelectedPos[0]]='  '
+                    promote(WhiteToMove)
+                    WhiteToMove=False
+                    if len(ListEveryLegalMove())>0:
+                        EngineMove()
+                        promote(WhiteToMove)
+                        WhiteToMove=True
+                        debug()
+                    elif len(ListEveryLegalMove())==0 and IsKingInCheck(ChessBoard,WhiteToMove):
+                        print("That is Mate")
+                    else:
+                        print("That is Stalemate")
                 backgroundreset()
-                debug()
                 RedCheckSquare()
-                PieceSelected=False
+                PieceSelectedPos=False
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             SquareClicked=[pos[0]//100,pos[1]//100]
             if ChessBoard[SquareClicked[1]][SquareClicked[0]]!='  ':
-                PieceSelected=SquareClicked
-                PieceSelectedType=ChessBoard[PieceSelected[1]][PieceSelected[0]]
+                PieceSelectedPos=SquareClicked
+                PieceSelectedPosType=ChessBoard[PieceSelectedPos[1]][PieceSelectedPos[0]]
                 backgroundreset()
                 DrawLegalMoves()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and ChessBoard!=OneMoveBackChessBoard and OneMoveBackChessBoard:
@@ -109,6 +134,5 @@ while True:
             backgroundreset()
         if event.type == pygame.QUIT:
             pygame.quit()
-    #IsKingInCheck(ChessBoard,WhiteToMove)
     UpdatePiecePositions()
     pygame.display.update()
