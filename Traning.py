@@ -1,5 +1,4 @@
 import os
-import stockfish
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 import tensorflow as tf
 from utility import ToPositionInFENNotation
@@ -19,8 +18,8 @@ def normalize(board):
         sol.append(BinaryBoard)
     return sol
                  
-
-stockfish=Stockfish("./stockfish_13/stockfish_13")
+#To use traning function u have to have stockfish installed in this directory
+stockfish=Stockfish("./stockfish_13/stockfish_13") 
 stockfish.set_depth(1)
 model=tf.keras.models.load_model('Data/Data')
 
