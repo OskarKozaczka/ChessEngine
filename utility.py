@@ -1,11 +1,8 @@
 import copy
 import itertools as it
-from numpy import array
+from random import randint
 def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
     
-    
-
-
     SeemsLegal=False
     
     if WhiteToMove and piece[0]=='b': return False
@@ -102,7 +99,7 @@ def IsKingInCheck(board,WhiteToMove):
     return False
             
 
-def PrintPositionInFENNotation(board,WhiteToMove):
+def ToPositionInFENNotation(board,WhiteToMove):
     string=''
     for row in board:
         string+='/'
@@ -118,7 +115,7 @@ def PrintPositionInFENNotation(board,WhiteToMove):
                 Blanks+=1
         if Blanks!=0 and square==row[-1]: string+=str(Blanks)
 
-    print(string[1:]+(" w - - 0 1" if WhiteToMove else " b - - 0 1")) 
+    return string[1:]+(" w - - 0 1" if WhiteToMove else " b - - 0 1")
 
 def ToStatndardNotation(Move):
     Letters=['a','b','c','d','e','f','g','h']
@@ -128,4 +125,36 @@ def ToStatndardNotation(Move):
     string+=str(7-Move[2][1])
     return string
 
+def ListEveryLegalMove(ChessBoard,WhiteToMove):
+    ListOfMoves=[]
+    for xx in range(8):
+        for yy in range(8):
+            for x in range(8):
+                for y in range(8):
+                    if MoveValidator([xx,yy],[x,y],ChessBoard[yy][xx],ChessBoard,WhiteToMove):
+                        ListOfMoves.append((ChessBoard[yy][xx],[xx,yy],[x,y]))
+    return ListOfMoves
 
+def IsThisStalemate(ChessBoard,WhiteToMove):
+    if len(ListEveryLegalMove(ChessBoard,WhiteToMove))==0: return True
+    PieceCounter=0
+    for y in range(8):
+        for x in range(8):
+            if ChessBoard[y][x]!='  ' and ChessBoard[y][x][1]!='n' and ChessBoard[y][x][1]!='b': PieceCounter+=1
+    if PieceCounter==2: return True
+    return False
+
+def RandomMove(Moves):
+    return Moves[randint(0,len(Moves)-1)]
+
+
+def FormatMove(Move,board):
+    #from ('bb', 3, 2)
+    #to ['bb',(x,y),(3,2)]
+    moves=[]
+    for x in range(8):
+        for y in range(8):
+            if board[y][x]==Move[0]:
+                moves.append([Move[0],(y,x),(Move[1],7-Move[2])])
+
+    return moves
