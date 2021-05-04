@@ -1,13 +1,19 @@
 import tensorflow as tf
 from tensorflow import keras
 import tensorflow.keras.layers as layers
+from tensorflow.keras.models import Sequential
+from tensorflow.python.keras.backend import flatten
 
-model = tf.keras.Sequential([
+model = Sequential([
     layers.Input(shape=(12, 8, 8)),
-    layers.Conv2D(filters=32,kernel_size=3,padding="same" ,data_format='channels_last'),
-    layers.Conv2D(filters=32,kernel_size=3,padding="same" ,data_format='channels_last'),
-    layers.Conv2D(filters=32,kernel_size=3,padding="same" ,data_format='channels_last'),
-    layers.Conv2D(filters=32,kernel_size=3,padding="same" ,data_format='channels_last'),
+    layers.Conv2D(filters=64,kernel_size=3,padding="same" , activation='relu'),
+    layers.BatchNormalization(),
+    layers.Conv2D(filters=64,kernel_size=3,padding="same", activation='relu'),
+    layers.BatchNormalization(),
+    layers.Conv2D(filters=64,kernel_size=3,padding="same", activation='relu'),
+    layers.BatchNormalization(),
+    layers.Conv2D(filters=64,kernel_size=3,padding="same", activation='relu'),
+    layers.BatchNormalization(),
     layers.Flatten(),
     layers.Dense(64, activation='relu'),  
     layers.Dense(1)
@@ -15,6 +21,6 @@ model = tf.keras.Sequential([
 
 
 
-model.compile(optimizer='adam', loss=keras.losses.mse,metrics=None)
+model.compile(optimizer='adam', loss=keras.losses.mse)
 model.summary()
 model.save('Data/Data')

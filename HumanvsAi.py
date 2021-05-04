@@ -49,7 +49,7 @@ def promote(WhiteToMove):
 PieceSelectedPos=False
 WhiteToMove=True
 OneMoveBackChessBoard=False
-Mate=False
+Castle="KQkq"
 
 def RedCheckSquare():
     if IsKingInCheck(ChessBoard,WhiteToMove):
@@ -63,20 +63,55 @@ def RedCheckSquare():
 def DrawLegalMoves():
     for x in range(8):
         for y in range(8):
-            if MoveValidator(PieceSelectedPos,[x,y],PieceSelectedType,ChessBoard,WhiteToMove):
+            if MoveValidator(PieceSelectedPos,[x,y],PieceSelectedType,ChessBoard,WhiteToMove,Castle):
                 pygame.draw.rect(screen,(255,140,140),(100*x,100*y,100,100))
 
 def debug():
     print(array(ChessBoard),'\n')
     print(PieceSelectedPos,SquareClicked)
     print("Check",IsKingInCheck(ChessBoard,WhiteToMove))
-    print(ToPositionInFENNotation(ChessBoard,WhiteToMove))
+    print(ToPositionInFENNotation(ChessBoard,WhiteToMove,Castle))
+    print(Castle)
 
 def EngineMove():
-    Move=EvaluateBestMove(ChessBoard,WhiteToMove)
-    ChessBoard[Move[2][1]][Move[2][0]]=Move[0]
-    ChessBoard[Move[1][1]][Move[1][0]]='  '
+    global ChessBoard
+    move=EvaluateBestMove(ChessBoard,WhiteToMove,Castle)
+    ChessBoard=Move(ChessBoard,move)
 
+def CheckForEndgameConditions(ChessBoard,WhiteToMove):
+    if len(ListEveryLegalMove(ChessBoard,WhiteToMove,Castle))==0 and IsKingInCheck(ChessBoard,WhiteToMove):
+        print("That is Mate")
+    elif len(ListEveryLegalMove(ChessBoard,WhiteToMove,Castle))==0:
+        print("That is Stalemate")
+
+def Move(ChessBoard,move):
+    global Castle
+    #move = (bn,[2,4],[3,6])
+    ChessBoard[move[2][1]][move[2][0]]=move[0]
+    ChessBoard[move[1][1]][move[1][0]]="  "
+    promote(WhiteToMove)
+    if move[0][1]=='k' and move[1][0]-move[2][0]==-2:
+        ChessBoard[move[1][1]][move[1][0]+3]='  '
+        ChessBoard[move[1][1]][move[1][0]+1]='wr' if WhiteToMove else 'br'
+        Castle=Castle.replace("K",'') if WhiteToMove else Castle.replace("k",'')
+    if move[0][1]=='k' and move[1][0]-move[2][0]==2:
+        ChessBoard[move[1][1]][move[1][0]-4]='  '
+        ChessBoard[move[1][1]][move[1][0]-1]='wr' if WhiteToMove else 'br'
+        Castle=Castle.replace("Q",'') if WhiteToMove else Castle.replace("q",'')
+
+    if ChessBoard[7][7]!="wr": Castle=Castle.replace("K",'')
+    if ChessBoard[7][0]!="wr": Castle=Castle.replace("Q",'')
+    if ChessBoard[0][7]!="br": Castle=Castle.replace("k",'')
+    if ChessBoard[0][0]!="br": Castle=Castle.replace("q",'')
+    if ChessBoard[7][4]!="wk": 
+        Castle=Castle.replace("K",'')
+        Castle=Castle.replace("Q",'')
+    if ChessBoard[0][4]!="bk":
+         Castle=Castle.replace("k",'')
+         Castle=Castle.replace("q",'')
+    return ChessBoard
+
+        
 while True:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONUP:
@@ -84,22 +119,21 @@ while True:
             pos = pygame.mouse.get_pos()
             SquareClicked=[pos[0]//100,pos[1]//100]
             if PieceSelectedPos:
-                if MoveValidator(PieceSelectedPos,SquareClicked,PieceSelectedType,ChessBoard,WhiteToMove):
-                    move=(PieceSelectedType,PieceSelectedPos,SquareClicked)
-                    print('move',move)
+                if MoveValidator(PieceSelectedPos,SquareClicked,PieceSelectedType,ChessBoard,WhiteToMove,Castle):
                     OneMoveBackChessBoard=copy.deepcopy(ChessBoard)
-                    ChessBoard[SquareClicked[1]][SquareClicked[0]]=ChessBoard[PieceSelectedPos[1]][PieceSelectedPos[0]]
-                    ChessBoard[PieceSelectedPos[1]][PieceSelectedPos[0]]='  '
-                    promote(WhiteToMove)
+                    move=(PieceSelectedType,PieceSelectedPos,SquareClicked)
+                    ChessBoard=Move(ChessBoard,move)
                     WhiteToMove=False
-                    if len(ListEveryLegalMove(ChessBoard,WhiteToMove))>0:
+                    backgroundreset()
+                    RedCheckSquare()
+                    UpdatePiecePositions()
+                    pygame.display.update()
+                    if len(ListEveryLegalMove(ChessBoard,WhiteToMove,Castle))>0:
                         EngineMove()
                         promote(WhiteToMove)
                         WhiteToMove=True
-                    if len(ListEveryLegalMove(ChessBoard,WhiteToMove))==0 and IsKingInCheck(ChessBoard,WhiteToMove):
-                        print("That is Mate")
-                    elif len(ListEveryLegalMove(ChessBoard,WhiteToMove))==0:
-                        print("That is Stalemate")
+                    debug()
+                    CheckForEndgameConditions(ChessBoard,WhiteToMove)
                 backgroundreset()
                 RedCheckSquare()
                 PieceSelectedPos=False

@@ -23,16 +23,26 @@ stockfish=Stockfish("./stockfish_13/stockfish_13")
 stockfish.set_depth(1)
 model=tf.keras.models.load_model('Data/Data')
 
-def Train(ChessBoard,WhiteToMove):
+#fen_position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+#stockfish.set_fen_position(fen_position)
+#print(stockfish.get_evaluation())
+
+round=1
+def Train(ChessBoard,WhiteToMove,Castle):
+    global round
+    round+=1
     t1=time()
     global model
-    #model=tf.keras.models.load_model('Data/Data')
-    fen_position=ToPositionInFENNotation(ChessBoard,WhiteToMove)
+    fen_position=ToPositionInFENNotation(ChessBoard,WhiteToMove,Castle)
     stockfish.set_fen_position(fen_position)
     info=stockfish.get_evaluation()
-    if info["type"]=="mate": info=10000 if WhiteToMove else -10000
-    else: info=info['value']
-    ChessBoard=normalize(ChessBoard)
-    model.fit([ChessBoard], [info], epochs=1000,verbose=1 ,callbacks=[callbacks.EarlyStopping(monitor='loss', patience=50, min_delta=1e-4)])
-    model.save('Data/Data')
-    print('Training in ',time()-t1)
+    if info["type"]=="mate": print('mate in',info['value'])
+    else: 
+        info=info['value']
+        print(info)
+        ChessBoard=normalize(ChessBoard)
+        model.fit([ChessBoard], [info], epochs=1,verbose=0 ,callbacks=[callbacks.EarlyStopping(monitor='loss', patience=10, min_delta=1)])
+    if round%1000==0:
+         model.save('Data/Data')
+         print("saved")
+    #print('Training in ',time()-t1)

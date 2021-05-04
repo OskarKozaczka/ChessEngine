@@ -1,7 +1,7 @@
 import copy
 import itertools as it
 from random import randint
-def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
+def MoveValidator(startpos,endpos,piece,board,WhiteToMove,Castle):
     
     SeemsLegal=False
     
@@ -70,6 +70,15 @@ def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
     if piece=='wk' or piece=='bk':
         if endpos==startpos: return False  
         if startpos[1]-1<=endpos[1]<=startpos[1]+1 and startpos[0]-1<=endpos[0]<=startpos[0]+1: SeemsLegal=True
+        
+        if startpos[0]+2==endpos[0] and startpos[1]==endpos[1]:
+            if board[startpos[1]][startpos[0]+1]=="  " and board[startpos[1]][startpos[0]+2]=="  ":
+                if IsKingInCheck(board,WhiteToMove)==False: 
+                    if "K" in Castle if WhiteToMove else "k" in Castle: SeemsLegal=True
+        if startpos[0]-2==endpos[0] and startpos[1]==endpos[1]:
+            if board[startpos[1]][startpos[0]-1]=="  " and board[startpos[1]][startpos[0]-2]=="  "and board[startpos[1]][startpos[0]-3]=="  ":
+                if IsKingInCheck(board,WhiteToMove)==False: 
+                    if "Q" in Castle if WhiteToMove else "q" in Castle: SeemsLegal=True
 
 
 
@@ -82,24 +91,23 @@ def MoveValidator(startpos,endpos,piece,board,WhiteToMove):
 
 def IsKingInCheck(board,WhiteToMove):
     PosOfKing=0
-    
     for x in range(8):
         for y in range(8):
             if board[y][x]=='wk' and WhiteToMove: 
                 PosOfKing=[x,y]
                 break
-            if board[y][x]=='bk' and WhiteToMove ==False: 
+            if board[y][x]=='bk' and WhiteToMove == False: 
                 PosOfKing=[x,y]
                 break
     if PosOfKing==0: return True
     for x in range(8):
         for y in range(8):
-            if MoveValidator([x,y],PosOfKing,board[y][x],board,False if WhiteToMove else True):
+            if MoveValidator([x,y],PosOfKing,board[y][x],board,False if WhiteToMove else True,""):
                 return True
     return False
             
 
-def ToPositionInFENNotation(board,WhiteToMove):
+def ToPositionInFENNotation(board,WhiteToMove,Castle):
     string=''
     for row in board:
         string+='/'
@@ -110,12 +118,15 @@ def ToPositionInFENNotation(board,WhiteToMove):
                     string+=str(Blanks)
                     Blanks=0
                 string+=square[1] if square[0]=='b' else square[1].upper() 
-            
             else:
                 Blanks+=1
         if Blanks!=0 and square==row[-1]: string+=str(Blanks)
 
-    return string[1:]+(" w - - 0 1" if WhiteToMove else " b - - 0 1")
+
+
+    string= string[1:]+(" w " if WhiteToMove else " b ")
+    string+=Castle
+    return string+" - 0 1"
 
 def ToStatndardNotation(Move):
     Letters=['a','b','c','d','e','f','g','h']
@@ -125,18 +136,18 @@ def ToStatndardNotation(Move):
     string+=str(7-Move[2][1])
     return string
 
-def ListEveryLegalMove(ChessBoard,WhiteToMove):
+def ListEveryLegalMove(ChessBoard,WhiteToMove,Castle):
     ListOfMoves=[]
     for xx in range(8):
         for yy in range(8):
             for x in range(8):
                 for y in range(8):
-                    if MoveValidator([xx,yy],[x,y],ChessBoard[yy][xx],ChessBoard,WhiteToMove):
+                    if MoveValidator([xx,yy],[x,y],ChessBoard[yy][xx],ChessBoard,WhiteToMove,Castle):
                         ListOfMoves.append((ChessBoard[yy][xx],[xx,yy],[x,y]))
     return ListOfMoves
 
 def IsThisStalemate(ChessBoard,WhiteToMove):
-    if len(ListEveryLegalMove(ChessBoard,WhiteToMove))==0: return True
+    if len(ListEveryLegalMove(ChessBoard,WhiteToMove,''))==0: return True
     PieceCounter=0
     for y in range(8):
         for x in range(8):
