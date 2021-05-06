@@ -48,7 +48,7 @@ def DrawLegalMoves():
 
 def EngineMove():
     t1=time()
-    move=SearchBestMove(2)
+    move=SearchBestMove(1)
     print("time",time()-t1)
     ChessBoard.Move(move)
 
@@ -56,7 +56,6 @@ def EngineMove():
 while True:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONUP:
-            ChessBoard.debug()
             pos = pygame.mouse.get_pos()
             SquareClicked=[pos[0]//100,pos[1]//100]
             if PieceSelectedPos:
@@ -64,12 +63,14 @@ while True:
                     OneMoveBackChessBoard=copy.deepcopy(ChessBoard.Board)
                     move=(PieceSelectedType,PieceSelectedPos,SquareClicked)
                     ChessBoard.Move(move)
+                    ChessBoard.debug()
                     backgroundreset()
                     RedCheckSquare()
                     UpdatePiecePositions()
                     pygame.display.update()
                     if len(ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle))>0:
                         EngineMove()
+                        ChessBoard.debug()
                     ChessBoard.CheckForEndgameConditions()
                 backgroundreset()
                 RedCheckSquare()

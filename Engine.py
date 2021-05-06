@@ -7,7 +7,6 @@ from time import time
 from Chess import ChessBoard
 from stockfish import Stockfish
 from statistics import mean
-import tensorflow.keras.callbacks as callbacks
 from time import time
 
 
@@ -42,7 +41,7 @@ def Search(depth,alpha,beta):
     for move in moves:
         SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
         ChessBoard.Move(move)
-        #Train(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+        Train(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
         Eval=-Search(depth-1,-alpha,-beta)
         ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
         if Eval>=beta:
@@ -85,7 +84,7 @@ def Train(ChessBoard,WhiteToMove,Castle):
         info=info['value']
         #print(info)
         ChessBoard=normalize(ChessBoard)
-        model.fit([ChessBoard], [info], epochs=1,verbose=0 ,callbacks=[callbacks.EarlyStopping(monitor='loss', patience=10, min_delta=1)])
+        model.fit([ChessBoard], [info], epochs=1,verbose=0)
         ChessBoard=tf.expand_dims(ChessBoard,0)
         #EvAcc(info,model.predict(ChessBoard)[0][0])
     if round%1000==0:
