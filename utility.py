@@ -1,6 +1,7 @@
 import copy
 import itertools as it
 from random import randint
+
 def MoveValidator(startpos,endpos,piece,board,WhiteToMove,Castle):
     
     SeemsLegal=False
@@ -89,6 +90,7 @@ def MoveValidator(startpos,endpos,piece,board,WhiteToMove,Castle):
         if IsKingInCheck(board2,WhiteToMove)==False: return True
     return False
 
+
 def IsKingInCheck(board,WhiteToMove):
     PosOfKing=0
     for x in range(8):
@@ -136,6 +138,7 @@ def ToStatndardNotation(Move):
     string+=str(7-Move[2][1])
     return string
 
+
 def ListEveryLegalMove(ChessBoard,WhiteToMove,Castle):
     ListOfMoves=[]
     for xx in range(8):
@@ -152,7 +155,9 @@ def IsThisStalemate(ChessBoard,WhiteToMove):
     for y in range(8):
         for x in range(8):
             if ChessBoard[y][x]!='  ' and ChessBoard[y][x][1]!='n' and ChessBoard[y][x][1]!='b': PieceCounter+=1
-    if PieceCounter==2: return True
+            if ChessBoard[y][x][1]=='n':PieceCounter+=0.5
+            if ChessBoard[y][x][1]=='b':PieceCounter+=0.5
+    if PieceCounter<3: return True
     return False
 
 def RandomMove(Moves):
