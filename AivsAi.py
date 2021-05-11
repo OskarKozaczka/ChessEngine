@@ -40,7 +40,7 @@ def RedCheckSquare():
 
 
 def EngineMove():
-    move=SearchBestMove(1)
+    move=SearchBestMove(2)
     ChessBoard.Move(move)
 
 

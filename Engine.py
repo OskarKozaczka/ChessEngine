@@ -26,43 +26,83 @@ def normalize(board):
 model=tf.keras.models.load_model('Data/Data')
 
 
-def Search(depth,alpha,beta):
-    moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+def Search(depth,alpha,beta,MaxPlayer):
 
-    if len(moves)==0:
-        if ChessBoard.CheckForEndgameConditions=="Mate": return -100000
-        if ChessBoard.CheckForEndgameConditions=="Stalemate": return 0
+    if MaxPlayer:
+        moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
 
-    if depth==0:
-        ChessBoardAfterMove=normalize(ChessBoard.Board)
-        ChessBoardAfterMove=tf.expand_dims(ChessBoardAfterMove,0)
-        Value=model.predict(ChessBoardAfterMove)[0]
-        return Value
-    for move in moves:
-        SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
-        ChessBoard.Move(move)
-        Train(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
-        Eval=-Search(depth-1,-alpha,-beta)
-        ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
-        if Eval>=beta:
-            return beta
-        alpha = max(alpha,Eval)
-    return alpha
+        if len(moves)==0:
+            if ChessBoard.CheckForEndgameConditions=="Mate": return -100000
+            if ChessBoard.CheckForEndgameConditions=="Stalemate": return 0
+
+        if depth==0:
+            ChessBoardAfterMove=normalize(ChessBoard.Board)
+            ChessBoardAfterMove=tf.expand_dims(ChessBoardAfterMove,0)
+            Value=model.predict(ChessBoardAfterMove)[0]
+            return Value
+        for move in moves:
+            SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
+            ChessBoard.Move(move)
+            Train(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+            Eval=-Search(depth-1,alpha,beta,False)
+            ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
+
+            alpha = max(alpha,Eval)
+            if beta<=alpha:
+                break
+        return alpha
+    else:
+        moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+
+        if len(moves)==0:
+            if ChessBoard.CheckForEndgameConditions=="Mate": return -100000
+            if ChessBoard.CheckForEndgameConditions=="Stalemate": return 0
+
+        if depth==0:
+            ChessBoardAfterMove=normalize(ChessBoard.Board)
+            ChessBoardAfterMove=tf.expand_dims(ChessBoardAfterMove,0)
+            Value=model.predict(ChessBoardAfterMove)[0]
+            return Value
+        for move in moves:
+            SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
+            ChessBoard.Move(move)
+            Train(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+            Eval=-Search(depth-1,alpha,beta,True)
+            ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
+ 
+            beta = min(alpha,Eval)
+            if beta>=alpha:
+                break
+        return beta
 
 
 def SearchBestMove(depth):
-    BestMove=None
-    MaxEval=-100000
-    moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
-    for move in moves:
-        SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
-        ChessBoard.Move(move)
-        Eval=Search(depth-1,-10000,10000)
-        if Eval>MaxEval:
-            MaxEval=Eval
-            BestMove=move
-        ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
-    return BestMove
+    if ChessBoard.WhiteToMove:
+        BestMove=None
+        MaxEval=-100000
+        moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+        for move in moves:
+            SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
+            ChessBoard.Move(move)
+            Eval=Search(depth-1,10000,-10000,False)
+            if Eval>MaxEval:
+                MaxEval=Eval
+                BestMove=move
+            ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
+        return BestMove
+    else:
+        BestMove=None
+        MinEval=100000
+        moves = ListEveryLegalMove(ChessBoard.Board,ChessBoard.WhiteToMove,ChessBoard.Castle)
+        for move in moves:
+            SBoard,SCastle,SWhiteToMove=deepcopy(ChessBoard.Board),ChessBoard.Castle,ChessBoard.WhiteToMove
+            ChessBoard.Move(move)
+            Eval=Search(depth-1,-10000,10000,True)
+            if Eval<MinEval:
+                MinEval=Eval
+                BestMove=move
+            ChessBoard.Board,ChessBoard.Castle,ChessBoard.WhiteToMove=SBoard,SCastle,SWhiteToMove
+        return BestMove
 
 #To use traning function u have to have stockfish installed in this directory
 stockfish=Stockfish("./stockfish_13/stockfish_13") 
